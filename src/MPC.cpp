@@ -5,6 +5,10 @@
 
 using CppAD::AD;
 
+// Both the reference cross track and orientation errors are 0.
+// The reference velocity is set to 70 mph.
+double ref_v = 70;
+
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
 // when one variable starts and another ends to make our lifes easier.
@@ -35,7 +39,7 @@ class FG_eval {
     for (unsigned int t = 0; t < N; ++t) {
       fg[0] += CppAD::pow(vars[cte_start + t], 2);
       fg[0] += 100*CppAD::pow(vars[epsi_start + t], 2);
-      fg[0] += 200*CppAD::pow(vars[v_start + t] - ref_v, 2);
+      fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     // Minimize the use of actuators.

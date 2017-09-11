@@ -21,10 +21,6 @@ const double dt = 0.05;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-// Both the reference cross track and orientation errors are 0.
-// The reference velocity is set to 70 mph.
-double ref_v = 70;
-
 class MPC {
   public:
   struct Output_t {
