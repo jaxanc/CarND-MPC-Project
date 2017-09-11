@@ -92,14 +92,24 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
-          /*
-          * TODO: Calculate steering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-          double steer_value;
-          double throttle_value;
+          // Transform waypoints from global into perspective of the car
+          Eigen::VectorXd waypointsX(ptsx.size());
+          Eigen::VectorXd waypointsY(ptsx.size());
+          for (unsigned int i = 0; i < ptsx.size(); ++i) {
+            waypointsX[i] = (ptsx[i] - px) * cos(-psi) - (ptsy[i] - py) * sin(-psi);
+            waypointsY[i] = (ptsx[i] - px) * sin(-psi) + (ptsy[i] - py) * cos(-psi);
+          }
+
+          Eigen::VectorXd waypointCoeffients = polyfit(waypointsX, waypointsY, 3);
+          double cte = polyeval(waypointCoeffients, 0);
+          double epsi = -atan(waypointCoeffients[1]);
+
+          Eigen::VectorXd state(6);
+          state << 0, 0, 0, v, cte, epsi;
+
+          vector<double> vars = mpc.Solve(state, waypointCoeffients);
+          double steer_value = vars[0];
+          double throttle_value = vars[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
