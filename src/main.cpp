@@ -91,6 +91,13 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double delta = j[1]["steering_angle"];
+          double acceleration = j[1]["throttle"];
+
+          // predict state in 100ms
+          double latency = 0.1; 
+          psi += -v*delta/Lf*latency/2.67;
+          v += acceleration*latency;
 
           // Transform waypoints from global into perspective of the car
           Eigen::VectorXd waypointsX(ptsx.size());
@@ -110,14 +117,12 @@ int main() {
           state << 0, 0, 0, v, cte, epsi;
 
           MPC::Output_t mpcOutput = mpc.Solve(state, waypointCoeffients);
-          double steer_value = mpcOutput.delta[0];
-          double throttle_value = mpcOutput.a[0];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = steer_value / deg2rad(25);
-          msgJson["throttle"] = throttle_value;
+          msgJson["steering_angle"] = mpcOutput.delta[0] / deg2rad(25);
+          msgJson["throttle"] = mpcOutput.a[0];
 
           //Display the MPC predicted trajectory 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
