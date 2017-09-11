@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const size_t N = 20;
+const size_t N = 10;
 const double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
