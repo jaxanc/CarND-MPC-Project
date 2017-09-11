@@ -140,9 +140,8 @@ class FG_eval {
 MPC::MPC() {}
 MPC::~MPC() {}
 
-vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
+MPC::Output_t MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   bool ok = true;
-  size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = state[0];
@@ -256,13 +255,20 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
-  // TODO: Return the first actuator values. The variables can be accessed with
-  // `solution.x[i]`.
-  //
-  // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
-  // creates a 2 element double vector.
-    return {solution.x[x_start + 1],   solution.x[y_start + 1],
-          solution.x[psi_start + 1], solution.x[v_start + 1],
-          solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start],   solution.x[a_start]};
+  Output_t mpcOutput;
+
+
+  for (unsigned int i = 0; i < N-1; ++i)
+  {
+    mpcOutput.x.push_back(solution.x[x_start+i]);
+    mpcOutput.y.push_back(solution.x[y_start+i]);
+    mpcOutput.psi.push_back(solution.x[psi_start+i]);
+    mpcOutput.v.push_back(solution.x[v_start+i]);
+    mpcOutput.cte.push_back(solution.x[cte_start+i]);
+    mpcOutput.epsi.push_back(solution.x[epsi_start+i]);
+    mpcOutput.delta.push_back(solution.x[delta_start+i]);
+    mpcOutput.a.push_back(solution.x[a_start+i]);
+  }
+
+  return mpcOutput;
 }
